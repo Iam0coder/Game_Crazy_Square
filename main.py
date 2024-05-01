@@ -2,7 +2,7 @@ import pygame
 import random
 
 
-# Класс Player описывает игрока в игре.
+# Класс Player описывает игрока (квадратик) в игре.
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, size, screen_width, screen_height):
         super().__init__()
@@ -59,7 +59,7 @@ class Game:
         pygame.init()
         self.screen_width, self.screen_height = 800, 600
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        pygame.display.set_caption("Crazy Square")  # Название окна
+        pygame.display.set_caption("Crazy Square")
         self.clock = pygame.time.Clock()
         self.player = Player(self.screen_width // 2, self.screen_height // 2, 30, self.screen_width, self.screen_height)
         self.enemies = pygame.sprite.Group()
@@ -79,7 +79,7 @@ class Game:
             self.render()
         pygame.quit()  # Закрытие Pygame после выхода из цикла
 
-    # Обработка событий (например, нажатие клавиш)
+    # Обработка событий (нажатие клавиш)
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,10 +117,11 @@ class Game:
     # Действия при окончании игры
     def game_over(self):
         font = pygame.font.Font(None, 60)
-        game_over_surface = font.render("Игра окончена! Нажмите Пробел.", True, (255, 0, 0))
+        game_over_surface = font.render("Игра окончена! Нажмите Пробел!", True, (255, 0, 0))
         self.screen.blit(game_over_surface, (self.screen_width // 2 - game_over_surface.get_width() // 2,
                                              self.screen_height // 2 - game_over_surface.get_height() // 2))
         pygame.display.flip()
+        self.difficulty = 1
         self.running = False  # Установить, что игра не запущена
         while True:
             for event in pygame.event.get():
@@ -135,12 +136,12 @@ class Game:
     def spawn_enemies(self):
         spawn_rate = max(1, 5 - self.difficulty)
         if random.randint(1, 1000) <= spawn_rate * self.difficulty:
-            initial_speed = max(2, self.difficulty)
+            initial_speed = max(2, self.difficulty) # Скорость появления врагов
             enemy = Enemy(self.screen_width, self.screen_height, 20, initial_speed)
             self.enemies.add(enemy)
             self.all_sprites.add(enemy)
 
-    # Обновление сложности игры
+    # Обновление сложности игры каждые 20 сек
     def update_difficulty(self):
         current_time = pygame.time.get_ticks()
         if (current_time - self.last_difficulty_increase_time) > 20000:
@@ -152,7 +153,11 @@ class Game:
         font = pygame.font.Font(None, 36)
         time_elapsed = (pygame.time.get_ticks() - self.start_ticks) // 1000
         time_surface = font.render(f"Время: {time_elapsed} секунд", True, (255, 255, 255))
-        self.screen.blit(time_surface, (self.screen_width // 2 - time_surface.get_width() // 2, 10))
+        self.screen.blit(time_surface, (10, 10))
+
+        # Добавление отображения текущей сложности игры
+        difficulty_surface = font.render(f"Сложность: {self.difficulty}", True, (255, 255, 255))
+        self.screen.blit(difficulty_surface, (600, 10))
 
 
 if __name__ == "__main__":
